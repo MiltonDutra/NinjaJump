@@ -12,4 +12,9 @@ public class SceneLocalController : MonoBehaviour {
     {
         PlayStore.ShowLeaderBoard();
     }
+    public void ShowAds()
+    {
+        ADS.instance.ShowAd();
+        
+    }
 }

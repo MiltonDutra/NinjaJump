@@ -7,7 +7,7 @@ public class GameController : MonoBehaviour {
     public Animator animUI;
     public Text score, pontos, coin;
     public static GameController gameController;
-    private int scoreValor=0;
+    public int scoreValor=0;
     //Sistema de hit
     public GameObject hitGameObject;
     private int comboHit = 1;
@@ -20,15 +20,12 @@ public class GameController : MonoBehaviour {
     public Color stage1, stage2, stage3;
     public Animator animHit;
     public GameObject smokePlayer;
+    public GameObject playerPrefab;
+    private bool secondChance = true;
 	void Start () {
-        if (gameController == null)
-        {
-            gameController= this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+
+        gameController = this;
+        secondChance = true;
         score.text = "0";
       //  SetHit();
 	}
@@ -46,26 +43,37 @@ public class GameController : MonoBehaviour {
 
     public void GameOver()
     {
-        string recordeValor = PlayerPrefs.GetInt("recorde").ToString();
-        if (PlayerPrefs.GetInt("recorde") < scoreValor)
+        if (secondChance)
         {
-            recordeValor = "NEW\nRECORDE\n" + scoreValor;
-            PlayerPrefs.SetInt("recorde",scoreValor);
+            //ADS.ShowRewardedAd();
+            animUI.SetBool("SecondChance", true);
+            secondChance = false;
         }
         else
         {
-            recordeValor =  "RECORDE\n"+recordeValor;
+
+
+            string recordeValor = PlayerPrefs.GetInt("recorde").ToString();
+            if (PlayerPrefs.GetInt("recorde") < scoreValor)
+            {
+                recordeValor = "NEW\nRECORDE\n" + scoreValor;
+                PlayerPrefs.SetInt("recorde", scoreValor);
+            }
+            else
+            {
+                recordeValor = "RECORDE\n" + recordeValor;
+            }
+            PlayStore.SetScore(PlayerPrefs.GetInt("recorde"), GPGSIds.leaderboard_ranking);
+            animUI.SetTrigger("GameOver");
+
+            recordeValor = string.Format("<color=#16FF00>{0}</color>", recordeValor);
+            pontos.text = "POINT\n" + scoreValor.ToString() + "\n" + recordeValor;
+            //atual.text = scoreValor.ToString();
+            smokePlayer.SetActive(false);
+            hitGameObject.SetActive(false);
+            StartCoroutine(CoinSetText());
+            //ADS.ShowRewardedAd();
         }
-        PlayStore.SetScore(PlayerPrefs.GetInt("recorde"), GPGSIds.leaderboard_ranking); 
-        animUI.SetTrigger("GameOver");
-        
-        recordeValor =  string.Format("<color=#16FF00>{0}</color>", recordeValor);
-        pontos.text = "POINT\n"+scoreValor.ToString()+"\n"+recordeValor;
-        //atual.text = scoreValor.ToString();
-        smokePlayer.SetActive(false);
-        hitGameObject.SetActive(false);
-        StartCoroutine(CoinSetText());
-        ADS.ShowRewardedAd();
 
     }
     public void Score()
@@ -162,4 +170,12 @@ public class GameController : MonoBehaviour {
         }
         coin.text = "X" + currentCoin.ToString();
     }
+    
+    public void SetResetGame()
+    {
+        NinjaController.Instance.ResetPlayer();
+        animUI.SetBool("SecondChance", false);
+    }
+    
+   
 }

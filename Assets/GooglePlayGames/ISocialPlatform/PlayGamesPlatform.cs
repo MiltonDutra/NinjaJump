@@ -23,7 +23,6 @@ namespace GooglePlayGames
     using GooglePlayGames.BasicApi.Events;
     using GooglePlayGames.BasicApi.Multiplayer;
     using GooglePlayGames.BasicApi.Nearby;
-    using GooglePlayGames.BasicApi.Quests;
     using GooglePlayGames.BasicApi.SavedGame;
     using GooglePlayGames.BasicApi.Video;
     using GooglePlayGames.OurUtils;
@@ -184,17 +183,6 @@ namespace GooglePlayGames
             get
             {
                 return mClient.GetEventsClient();
-            }
-        }
-
-        /// <summary>Gets the quests client object.</summary>
-        /// <value>The quests client.</value>
-        [Obsolete("Quests are being removed in 2018.")]
-        public IQuestsClient Quests
-        {
-            get
-            {
-                return mClient.GetQuestsClient();
             }
         }
 
@@ -771,6 +759,10 @@ namespace GooglePlayGames
                 {
                     mClient.IncrementAchievement(achievementID, numSteps, callback);
                 }
+                else if (callback != null)
+                {
+                    callback.Invoke(false);
+                }
             }
             else if (progress >= 100)
             {
@@ -784,6 +776,10 @@ namespace GooglePlayGames
                 // not enough to unlock
                 GooglePlayGames.OurUtils.Logger.d("Progress " + progress +
                     " not enough to unlock non-incremental achievement.");
+                if (callback != null)
+                {
+                    callback.Invoke(false);
+                }
             }
         }
 
@@ -1195,7 +1191,7 @@ namespace GooglePlayGames
         /// Shows the standard Google Play Games leaderboards user interface,
         /// which allows the player to browse their leaderboards. If you have
         /// configured a specific leaderboard as the default through a call to
-        /// <see cref="SetDefaultLeaderboardForUi" />, the UI will show that
+        /// <see cref="SetDefaultLeaderboardForUI" />, the UI will show that
         /// specific leaderboard only. Otherwise, a list of all the leaderboards
         /// will be shown.
         /// </summary>

@@ -25,29 +25,36 @@ public class NinjaController : MonoBehaviour {
 #if UNITY_EDITOR || UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         bool mouseInput0 = Input.GetMouseButton(0);
         bool mouseInput1 = Input.GetMouseButtonUp(0);
-        if(!EventSystem.current.IsPointerOverGameObject()){
+
+        if (EventSystem.current.IsPointerOverGameObject() && Input.GetMouseButtonDown(0)) dontUseTouch = true;
+
+        if(!dontUseTouch){
             ninjaScript.InputNinja(mouseInput0, mouseInput1);
         }
+        else
+        {
+             dontUseTouch = !mouseInput1;
+        }
 #elif UNITY_ANDROID
+
         bool touchPress = false;
         bool touchEnd = false;
         if (Input.touchCount > 0)
         {
-            
-            Touch touch = Input.GetTouch (0); 
-            if(!EventSystem.current.IsPointerOverGameObject(touch.fingerId)){
-                touchPress = !dontUseTouch;
-                if (touch.phase == TouchPhase.Ended)
-                {
-                    touchEnd = !dontUseTouch;
-                    dontUseTouch = false;
-                }
-            }else{
-                dontUseTouch = true;
-            }
-
+            Touch touch = Input.GetTouch(0);
+            touchPress = touch.phase != TouchPhase.Ended || touch.phase != TouchPhase.Canceled;
+            touchEnd = touch.phase == TouchPhase.Ended; 
+            if (EventSystem.current.IsPointerOverGameObject(touch.fingerId)) dontUseTouch = true;
+       
         }
-        ninjaScript.InputNinja(touchPress, touchEnd);
+        if (!dontUseTouch){
+            ninjaScript.InputNinja(touchPress, touchEnd);
+        }
+        else
+        {
+            dontUseTouch = !touchEnd;
+        }
+        
 #endif
     }
     private void OnTriggerEnter2D(Collider2D collision)
@@ -97,5 +104,10 @@ public class NinjaController : MonoBehaviour {
         {
             spriteRenderer.sprite = player.sprite;
         }
+    }
+    public void ResetPlayer()
+    {
+        ninjaScript.ForceConectedCurrentObstacle();
+
     }
 }

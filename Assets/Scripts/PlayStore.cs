@@ -9,13 +9,33 @@ using System;
 
 public class PlayStore : MonoBehaviour
 {
-    
-    private static bool isLogin;
+
+    public static PlayStore playStore;
+    public void Start()
+    {
+        if (playStore == null)
+        {
+            playStore = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
+        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesPlatform.InitializeInstance(config);
+        PlayGamesPlatform.Activate();
+
+        Login();
+    }
     public static void SetScore(long score, string leaderBoard)
 
     {
    #if UNITY_ANDROID
-        if (isLogin)
+        if (PlayGamesPlatform.Instance.localUser.authenticated)
         {
             Social.ReportScore(score, leaderBoard, (sucess =>
             {
@@ -35,13 +55,14 @@ public class PlayStore : MonoBehaviour
 
     {
 #if UNITY_ANDROID
-        if (isLogin)
+        if (PlayGamesPlatform.Instance.localUser.authenticated)
         {
             Social.ShowLeaderboardUI();
         }
         else
         {
             Login();
+            if (PlayGamesPlatform.Instance.localUser.authenticated) Social.ShowLeaderboardUI();
         }
 #endif
     }
@@ -64,13 +85,17 @@ public class PlayStore : MonoBehaviour
     public static void Login()
     {
 #if UNITY_ANDROID
-        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().Build();
-        PlayGamesPlatform.InitializeInstance(config);
-        PlayGamesPlatform.Activate();
+        
+       
         try
         {
-            PlayGamesPlatform.Instance.Authenticate(succes => { isLogin = succes; });
-           // Social.localUser.Authenticate();
+            //PlayGamesPlatform.Instance.Authenticate(succes => { isLogin = succes; });
+            if (!PlayGamesPlatform.Instance.localUser.authenticated)
+            {
+                PlayGamesPlatform.Instance.Authenticate(succes => {  }, false);
+                Debug.Log("LoginUser");
+            }
+            // Social.localUser.Authenticate();
         }
         catch (Exception e)
         {
@@ -78,5 +103,6 @@ public class PlayStore : MonoBehaviour
         }
 #endif
     }
+   
 
 }

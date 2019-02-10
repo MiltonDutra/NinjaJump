@@ -1,45 +1,82 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_ANDROID
-using UnityEngine.Advertisements;
-#endif
+using UnityEngine.Monetization;
 
-public class ADS : MonoBehaviour {
-    
-    public static void ShowRewardedAd()
+public class ADS : MonoBehaviour
+{
+    public string placementId = "rewardedVideo";
+    private static string gameId = "2759483";
+    private bool testMode = false;
+    public static ADS instance;
+
+    void Start()
     {
-#if UNITY_ANDROID
-        if (Advertisement.IsReady("video"))
+        if (instance == null)
         {
-            if (Random.Range(1, 15)==2)
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+            if (!Monetization.isInitialized)
             {
-                var options = new ShowOptions { resultCallback = HandleShowResult };
-                Advertisement.Show("video", options);
-                Time.timeScale = 0;
+                Monetization.Initialize(gameId, testMode);
             }
         }
-#endif
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+                
+        
+
     }
-#if UNITY_ANDROID
-    private static void HandleShowResult(ShowResult result)
+    public void ShowAd()
+    {
+        StartCoroutine(WaitForAd());
+    }
+
+    IEnumerator WaitForAd()
+    {
+       
+        while (!Monetization.IsReady(placementId))
+        {
+            Debug.Log("loop");
+          
+            
+            yield return null;
+        }
+
+        ShowAdPlacementContent ad = null;
+        ad = Monetization.GetPlacementContent(placementId) as ShowAdPlacementContent;
+
+        if (ad != null)
+        {
+            ad.Show(AdFinished);
+        }
+    }
+
+    void AdFinished(ShowResult result)
     {
         switch (result)
         {
             case ShowResult.Finished:
                 Debug.Log("The ad was successfully shown.");
-          
+                GameController.gameController.SetResetGame();
+                //NinjaController.Instance.gameObject.SetActive(true);
                 break;
             case ShowResult.Skipped:
                 Debug.Log("The ad was skipped before reaching the end.");
+
+                GameController.gameController.GameOver();
                 break;
             case ShowResult.Failed:
                 Debug.LogError("The ad failed to be shown.");
+                GameController.gameController.GameOver();
                 break;
-               
-        }
-        Time.timeScale = 1;
-    }
-#endif
 
+        }
+    }
+    
+  
 }

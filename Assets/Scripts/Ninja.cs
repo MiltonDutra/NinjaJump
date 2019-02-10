@@ -46,11 +46,12 @@ public class Ninja {
 
                 if (jumpInput)
                 {
+                    currentRgbConneted.angularVelocity = 0;
                     hindeJoint.enabled = false;
                     desconected = true;
                     Vector3 direction = rgbNinja.transform.right;
                     direction.Normalize();
-                    Debug.Log(direction);
+                    //Debug.Log(direction);
                     rgbNinja.AddForce(direction * 3700);
                     try
                     {
@@ -79,7 +80,7 @@ public class Ninja {
         {
 
             //MonoBehaviour.Destroy(currentRgbConneted.gameObject.transform.parent.gameObject, 0.5f);
-            SpawnObjectsController.spawnObjectsController.DesactiveObstacle(currentRgbConneted.gameObject.transform.parent.gameObject, 0.5f);
+            SpawnObjectsController.spawnObjectsController.DesactiveObstacle(currentRgbConneted.transform.parent.gameObject, 0.5f);
             hindeJoint.connectedBody = rgbConnected;
             hindeJoint.enabled = true;
             desconected = false;
@@ -87,6 +88,21 @@ public class Ninja {
             return true;
         }
         return false;
+    }
+    public void ForceConectedCurrentObstacle()
+    {
+        
+        rgbNinja.transform.position = currentRgbConneted.position;
+        hindeJoint.connectedBody = currentRgbConneted;
+        desconected = false;
+        gameOver = false;
+
+        rgbNinja.velocity = Vector2.zero;
+        animNinja.SetBool("Dead", false);
+        GameController.gameController.smokePlayer.SetActive(false);
+        currentRgbConneted.angularVelocity = 0;
+        rgbNinja.angularVelocity = 0;
+        hindeJoint.enabled = true;
     }
     private void CheckGameOver()
     {
@@ -100,7 +116,7 @@ public class Ninja {
     {
         if (!gameOver)
         {
-            animNinja.SetTrigger("Dead");
+            animNinja.SetBool("Dead", true);
             GameController.gameController.GameOver();
             gameOver = true;
         }

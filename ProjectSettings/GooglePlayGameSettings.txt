@@ -1,5 +1,5 @@
-lastUpgrade=00942
-proj.pluginVersion=0.9.42
+lastUpgrade=00953
+proj.pluginVersion=0.9.53
 proj.AppId=749062445406
 and.BundleId=com.Dumi.NinjaJump
 proj.classDir=Assets

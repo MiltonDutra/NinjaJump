@@ -44,7 +44,7 @@ public class Purchaser : MonoBehaviour, IStoreListener
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
           
         builder.AddProduct(kProductIDConsumable, ProductType.Consumable);
-        builder.AddProduct("brucebanner", ProductType.NonConsumable);
+        builder.AddProduct("brucebanner", ProductType.Consumable);
         builder.AddProduct("naruto", ProductType.Consumable);
 
             builder.AddProduct("subscription", ProductType.Subscription, new IDs(){
