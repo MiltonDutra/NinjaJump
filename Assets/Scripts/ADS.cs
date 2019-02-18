@@ -7,6 +7,7 @@ public class ADS : MonoBehaviour
 {
     public string placementId = "rewardedVideo";
     private static string gameId = "2759483";
+
     private bool testMode = false;
     public static ADS instance;
 
@@ -16,10 +17,11 @@ public class ADS : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            if (!Monetization.isInitialized)
+            if (Monetization.isSupported)
             {
                 Monetization.Initialize(gameId, testMode);
             }
+
         }
         else
         {
@@ -31,32 +33,19 @@ public class ADS : MonoBehaviour
         
 
     }
+    public bool adIsReady()
+    {
+       return Monetization.IsReady(placementId);
+    }
     public void ShowAd()
     {
-        StartCoroutine(WaitForAd());
+        ShowAdCallbacks options = new ShowAdCallbacks();
+        options.finishCallback = HandleShowResult;
+        ShowAdPlacementContent ad = Monetization.GetPlacementContent(placementId) as ShowAdPlacementContent;
+        ad.Show(options);
     }
 
-    IEnumerator WaitForAd()
-    {
-       
-        while (!Monetization.IsReady(placementId))
-        {
-            Debug.Log("loop");
-          
-            
-            yield return null;
-        }
-
-        ShowAdPlacementContent ad = null;
-        ad = Monetization.GetPlacementContent(placementId) as ShowAdPlacementContent;
-
-        if (ad != null)
-        {
-            ad.Show(AdFinished);
-        }
-    }
-
-    void AdFinished(ShowResult result)
+    void HandleShowResult(ShowResult result)
     {
         switch (result)
         {
